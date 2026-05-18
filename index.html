@@ -302,7 +302,6 @@ const SUPABASE_KEY = _k;
 const API = SUPABASE_URL + '/rest/v1/entries';
 const HEADERS = {
   'apikey': SUPABASE_KEY,
-  'Authorization': 'Bearer ' + SUPABASE_KEY,
   'Content-Type': 'application/json'
 };
 
@@ -321,12 +320,13 @@ async function loadDate() {
   const date = document.getElementById('datePicker').value;
   try {
     const res = await fetch(API + '?date=eq.' + date, { headers: HEADERS });
+    if (!res.ok) throw new Error('HTTP ' + res.status);
     const rows = await res.json();
     const record = rows[0] || {};
     document.getElementById('entryA').value = record.person_a || '';
     document.getElementById('entryB').value = record.person_b || '';
   } catch (e) {
-    showToast('加载失败: ' + e.message, true);
+    showToast('加载失败: ' + (e.message || e), true);
   }
   updateCharCount();
 }
@@ -356,14 +356,11 @@ async function saveEntry() {
       headers: { ...HEADERS, 'Prefer': 'resolution=merge-duplicates' },
       body: JSON.stringify(body)
     });
-    if (res.ok) {
-      showToast('已保存');
-      renderHistory();
-    } else {
-      showToast('保存失败', true);
-    }
+    if (!res.ok) throw new Error('HTTP ' + res.status);
+    showToast('已保存');
+    renderHistory();
   } catch (e) {
-    showToast('保存失败: ' + e.message, true);
+    showToast('保存失败: ' + (e.message || e), true);
   }
 
   btn.disabled = false;
@@ -375,7 +372,8 @@ async function deleteEntry(date, e) {
   if (!confirm('确定删除 ' + formatDate(date) + ' 的记录吗？')) return;
 
   try {
-    await fetch(API + '?date=eq.' + date, { method: 'DELETE', headers: HEADERS });
+    const res = await fetch(API + '?date=eq.' + date, { method: 'DELETE', headers: HEADERS });
+    if (!res.ok) throw new Error('HTTP ' + res.status);
     showToast('已删除');
     renderHistory();
     if (document.getElementById('datePicker').value === date) {
@@ -384,7 +382,7 @@ async function deleteEntry(date, e) {
       updateCharCount();
     }
   } catch (e) {
-    showToast('删除失败', true);
+    showToast('删除失败: ' + (e.message || e), true);
   }
 }
 
@@ -401,9 +399,8 @@ async function renderHistory() {
   const container = document.getElementById('historyList');
 
   try {
-    const res = await fetch(API + '?select=date,person_a,person_b&order=date.desc&limit=50', {
-      headers: HEADERS
-    });
+    const res = await fetch(API + '?select=date,person_a,person_b&order=date.desc&limit=50', { headers: HEADERS });
+    if (!res.ok) throw new Error('HTTP ' + res.status);
     const entries = await res.json();
 
     if (!entries.length) {
@@ -424,7 +421,7 @@ async function renderHistory() {
       '</div>';
     }).join('');
   } catch (e) {
-    container.innerHTML = '<div class="empty-state">加载失败: ' + e.message + '</div>';
+    container.innerHTML = '<div class="empty-state">加载失败: ' + (e.message || e) + '</div>';
   }
 }
 
