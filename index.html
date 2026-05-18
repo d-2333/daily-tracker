@@ -326,7 +326,7 @@ async function loadDate() {
     document.getElementById('entryA').value = record.person_a || '';
     document.getElementById('entryB').value = record.person_b || '';
   } catch (e) {
-    showToast('加载失败，请检查网络', true);
+    showToast('加载失败: ' + e.message, true);
   }
   updateCharCount();
 }
@@ -363,7 +363,7 @@ async function saveEntry() {
       showToast('保存失败', true);
     }
   } catch (e) {
-    showToast('保存失败，请检查网络', true);
+    showToast('保存失败: ' + e.message, true);
   }
 
   btn.disabled = false;
@@ -424,7 +424,7 @@ async function renderHistory() {
       '</div>';
     }).join('');
   } catch (e) {
-    container.innerHTML = '<div class="empty-state">加载失败，请稍后重试</div>';
+    container.innerHTML = '<div class="empty-state">加载失败: ' + e.message + '</div>';
   }
 }
 
