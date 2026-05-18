@@ -1,0 +1,6 @@
+{
+  "name": "daily-tracker",
+  "version": "2.0.0",
+  "description": "两人每日事项记录 - 云端同步版",
+  "private": true
+}
